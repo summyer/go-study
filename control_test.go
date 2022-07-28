@@ -76,7 +76,7 @@ func main3() {
 }
 
 /*
-switch选择语句
+选择语句
 选择语句switch
 - 可以使用任何类型或者表达式作为条件语句
 - 不需要写break,一旦条件符合自动终止
@@ -96,6 +96,7 @@ func main4() {
 		fmt.Println("None")
 	}
 }
+
 func main5() {
 	a := 1
 	switch {
@@ -152,6 +153,3 @@ LABEL1:
 Go之条件语句
 select 语句类似于 switch 语句，但是select会随机执行一个可运行的case。如果没有case可运行，它将阻塞，直到有case可运行。
 */
-func TestSelect(t *testing.T) {
-
-}

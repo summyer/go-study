@@ -29,7 +29,12 @@ func main() {
 	//TestChannel5()
 	//TestChannel6()
 	//TestChannel7()
-	TestSelect()
+	//TestSelect()
+	//TestSelect2()
+	//TestSelect3()
+	//TestSelect4()
+	//select {}  //测试不成功 goroutine 1 [select (no cases)]:
+	TestSelect5()
 }
 func TestGo() {
 	//go func() {}() //也可以使用匿名函数
@@ -81,6 +86,7 @@ func TestChannel2() {
 
 //channel可用设置缓存大小，不设置时默认为零就是堵塞的，如果设置了一个大小，在未被填满前都不会发生堵塞
 //没有缓存的话取出操作在放入操作之前
+//有缓存的话放先于取
 
 func TestChannel3() {
 	c := make(chan bool) //无缓存
@@ -174,17 +180,19 @@ Select
 //类似switch，只适用与channel
 func TestSelect() {
 	c1, c2 := make(chan int), make(chan string)
-	c
+	c := make(chan bool)
 	go func() {
 		for {
 			select {
 			case v, ok := <-c1:
 				if !ok {
+					c <- true
 					break
 				}
 				fmt.Println("c1", v)
 			case v, ok := <-c2:
 				if !ok {
+					c <- true
 					break
 				}
 				fmt.Println("c2", v)
@@ -199,5 +207,82 @@ func TestSelect() {
 	close(c2)
 
 	//需要另外加一个控制channel,不然可能只输出c1 1 /n  c2 hi/n  c1 3就退出了
+	<-c
+}
 
+func TestSelect2() {
+	c1, c2 := make(chan int), make(chan string)
+	c := make(chan bool, 2)
+
+	go func() {
+		a, b := false, false
+		for {
+			select {
+			case v, ok := <-c1: //c1关闭时ok等于false,关闭后select还是会多次读它的值，即"c1,end"会多次输出
+				if !ok {
+					//fmt.Println("c1,end")
+					if !a {
+						a = true
+						c <- true
+					}
+					break
+				}
+				fmt.Println("c1", v)
+			case v, ok := <-c2: //c2关闭时ok等于false
+				if !ok {
+					//fmt.Println("c2,end")
+					if !b {
+						b = true
+						c <- true
+					}
+					break
+				}
+				fmt.Println("c2", v)
+			}
+		}
+	}()
+	c1 <- 1
+	c2 <- "hi"
+	c1 <- 3
+	c2 <- "hello"
+	close(c1)
+	close(c2) //需要两个都关闭，不然main程序会一直堵塞
+	//有可能select case c1一直占用资源，case c2一直等待也会导致c2赋不了值导致main堵塞
+
+	//需要另外加一个控制channel,不然可能只输出c1 1 /n  c2 hi/n  c1 3就退出了
+	for i := 0; i < 2; i++ {
+		<-c
+	}
+}
+
+//写入
+func TestSelect3() {
+	c := make(chan int)
+	go func() {
+		for v := range c {
+			fmt.Println("c", v)
+		}
+	}()
+	for {
+		select {
+		case c <- 0:
+		case c <- 1:
+		}
+	}
+}
+
+//堵塞main函数, **测试不成功**
+func TestSelect4() {
+	select {}
+}
+
+//select超时
+func TestSelect5() {
+	c := make(chan bool)
+	select {
+	case <-c:
+		fmt.Println("c")
+	case <-time.After(3 * time.Second):
+		fmt.Println("Timeout")
+	}
 }
