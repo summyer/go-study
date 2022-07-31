@@ -3,3 +3,17 @@
 
 # go语言规范文档
 https://golang.google.cn/ref/spec
+
+# 
+int(a)
+usb.()
+reflect.Typeof()
+v := reflect.ValueOf(o)
+if v.Kind() != reflect.Ptr || !v.Elem().CanSet() {
+
+}
+
+str := `hello
+world
+v2.0`
+fmt.Println(str)
