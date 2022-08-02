@@ -1,7 +1,6 @@
-package main
+package mmm
 
 import (
-	"bytes"
 	"container/list"
 	"encoding/json"
 	"fmt"
@@ -11,17 +10,8 @@ import (
 	"time"
 )
 
-//var logger = log.Default()
-
-type MetadataOp struct {
-	MetadataId   string `json:"metadataId"`
-	MetadataType string `json:"metadataType"`
-	OperateType  string `json:"operateType"`
-}
-
-func main() {
-
-	var dataBytes, err = ioutil.ReadFile("/Users/summyer/go-workspace/study/mmm_cve_update/test_cvss.json")
+func HttpFanYi() {
+	var dataBytes, err = ioutil.ReadFile("/Users/summyer/go-workspace/study/mmm/test_fanyi.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,8 +30,7 @@ func main() {
 			if r, ok := item.(map[string]interface{}); ok {
 				//fmt.Println(r["cve_id"])
 				//interface{} ->转换成string
-				mo := MetadataOp{MetadataId: fmt.Sprintf("%v", r["cve_id"]), MetadataType: "CVE", OperateType: "UPDATE"}
-				l.PushBack(mo)
+				l.PushBack(fmt.Sprintf("%v", r["code"]))
 			}
 
 		}
@@ -49,9 +38,7 @@ func main() {
 	fmt.Println(l.Len())
 	i := 1
 	for item := l.Front(); item != nil; item = item.Next() {
-		//fmt.Println(item.Value.(MetadataOp).MetadataId)
-
-		//OnceReq(item.Value.(MetadataOp), i)
+		OnceReqWithCookie(item.Value.(string), i)
 		i++
 	}
 
@@ -60,24 +47,36 @@ func main() {
 
 }
 
-func OnceReq(mo MetadataOp, i int) {
-	jsonBytes, err := json.Marshal(mo)
+func OnceReq(url string, i int) {
+	// 创建请求
+	resp, err := http.Get("http://10.20.152.61:9000/api/translate/" + url) // url
 	if err != nil {
-		log.Printf("序列化body失败！err:%+v", err)
+		log.Printf("创建请求失败！err:%+v", err)
 		return
 	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("读取Body失败 error: %+v", err)
+		return
+	}
+	log.Println(string(body))
+}
 
+func OnceReqWithCookie(code string, i int) {
+	url := "https://mmm.dbappsecurity.com.cn/api/translate/"
+	url = "http://10.20.152.192:9000/api/translate/"
+	log.Println("开始翻译:", code, ",第几条:", i)
 	// 创建客户端
 	client := &http.Client{}
 	// 创建请求
-	request, err := http.NewRequest("POST", "mmm://10.20.152.192:9000/api/metadata-inform", bytes.NewReader(jsonBytes))
+	request, err := http.NewRequest("GET", url+code, nil)
 	if err != nil {
 		log.Printf("创建请求失败！err:%+v", err)
 		return
 	}
 	// 设置请求头
-	request.Header.Add("Cookie", "jsessionid-sc=Y2VhNjljNmUtN2RhMi00MmU1LTlhYzItMjAwOTljMWM4MjVh; token=mmm_1659079555676507583")
-	request.Header.Add("Content-Type", "application/json;charset=utf-8")
+	request.Header.Add("Cookie", "jsessionid-sc=MjhlYzQ0MjMtYWYxMC00ODJhLTgwYWUtNWZhOTAwNGJiY2I4; token=mmm_1659319566659247888")
 
 	// 设置1分钟的超时时间
 	client.Timeout = 1 * time.Minute
@@ -89,5 +88,5 @@ func OnceReq(mo MetadataOp, i int) {
 		log.Printf("读取Body失败 error: %+v", err)
 		return
 	}
-	log.Println(string(body), mo.MetadataId)
+	log.Println(string(body))
 }
