@@ -17,3 +17,34 @@ str := `hello
 world
 v2.0`
 fmt.Println(str)
+
+
+string到int
+int,err:=strconv.Atoi(string)
+
+string到int64
+int64, err := strconv.ParseInt(string, 10, 64)
+
+int到string
+string:=strconv.Itoa(int)
+
+int64到string
+string:=strconv.FormatInt(int64,10)
+
+
+# 交叉编译
+## 在Mac上编译可运行在Linux, Windows上的GO程序
+编译运行在 amd64位 linux系统
+>CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build main_run.go
+
+linux上执行：
+> chmod 777 main_run
+> ./main_run
+## 编译运行在 amd64位 windows系统
+>CGO_ENABLED=0 GOOS=windows  go build main_run.go
+
+window上执行：
+>main_run.exe
+
+## 此程序在linux上执行报错:找不到config/global_config.yml
+解决:在可执行程序目录下新建config目录，放入global_config.yml

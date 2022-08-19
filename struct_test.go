@@ -20,6 +20,9 @@ import (
 - 嵌入结构作为匿名字段看起来像继承，但不是继承
 - 可以使用匿名字段指针
 */
+var a int = 10
+
+//a=11  编译错误
 type test struct {
 }
 type person0 struct {

@@ -48,6 +48,7 @@ import packageName
 	package 别名\省略
 	import  a  fmt
 	import .   fmt     //不建议使用，易混淆     ；  不可以和别名同时使用（使用的别名就不能通过省略调用）
+    //使用【import _ 包路径】只是引用该包，仅仅是为了调用 init() 函数，所以无法通过包名来调用包中的其他函数。
 */
 
 /*
